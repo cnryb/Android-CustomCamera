@@ -42,14 +42,12 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private int screenWidth;
     private int screenHeight;
     private LinearLayout home_custom_top_relative;
-    private ImageView camera_delay_time;
     private View homeCustom_cover_top_view;
     private View homeCustom_cover_bottom_view;
     private View home_camera_cover_top_view;
     private View home_camera_cover_bottom_view;
     private ImageView flash_light;
-    private TextView camera_delay_time_text;
-    private ImageView camera_square;
+
     private int index;
     //底部高度 主要是计算切换正方形时的动画高度
     private int menuPopviewHeight;
@@ -57,11 +55,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private int animHeight;
     //闪光灯模式 0:关闭 1: 开启 2: 自动
     private int light_num = 0;
-    //延迟时间
-    private int delay_time;
-    private int delay_time_temp;
+
     private boolean isview = false;
-    private boolean is_camera_delay;
     private ImageView camera_frontback;
     private ImageView camera_close;
     private RelativeLayout homecamera_bottom_relative;
@@ -96,13 +91,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         camera_frontback = (ImageView) findViewById(R.id.camera_frontback);
         camera_frontback.setOnClickListener(this);
 
-        //延迟拍照时间
-        camera_delay_time = (ImageView) findViewById(R.id.camera_delay_time);
-        camera_delay_time.setOnClickListener(this);
 
-        //正方形切换
-        camera_square = (ImageView) findViewById(R.id.camera_square);
-        camera_square.setOnClickListener(this);
 
         //切换正方形时候的动画
         homeCustom_cover_top_view = findViewById(R.id.homeCustom_cover_top_view);
@@ -121,8 +110,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         flash_light = (ImageView) findViewById(R.id.flash_light);
         flash_light.setOnClickListener(this);
 
-        camera_delay_time_text = (TextView) findViewById(R.id.camera_delay_time_text);
-
         homecamera_bottom_relative = (RelativeLayout) findViewById(R.id.homecamera_bottom_relative);
     }
 
@@ -139,89 +126,30 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         bottomParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         homecamera_bottom_relative.setLayoutParams(bottomParam);
     }
-
-    private Handler mHandler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
-            int what = msg.what;
-            switch (what) {
-                case AppConstant.WHAT.SUCCESS:
-                    if (delay_time > 0) {
-                        camera_delay_time_text.setText("" + delay_time);
-                    }
-
-                    try {
-                        if (delay_time == 0) {
-                            captrue();
-                            is_camera_delay = false;
-                            camera_delay_time_text.setVisibility(View.GONE);
-                        }
-                    } catch (Exception e) {
-                        return;
-                    }
-
-                    break;
-
-                case AppConstant.WHAT.ERROR:
-                    is_camera_delay = false;
-                    break;
-
-            }
-        }
-    };
-
-
+    
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_camera:
                 if (isview) {
-                    if (delay_time == 0) {
-                        switch (light_num) {
-                            case 0:
-                                //关闭
-                                CameraUtil.getInstance().turnLightOff(mCamera);
-                                break;
-                            case 1:
-                                CameraUtil.getInstance().turnLightOn(mCamera);
-                                break;
-                            case 2:
-                                //自动
-                                CameraUtil.getInstance().turnLightAuto(mCamera);
-                                break;
-                        }
-                        captrue();
-                    } else {
-                        camera_delay_time_text.setVisibility(View.VISIBLE);
-                        camera_delay_time_text.setText(String.valueOf(delay_time));
-                        is_camera_delay = true;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                while (delay_time > 0) {
-                                    //按秒数倒计时
-                                    try {
-                                        Thread.sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        mHandler.sendEmptyMessage(AppConstant.WHAT.ERROR);
-                                        return;
-                                    }
-                                    delay_time--;
-                                    mHandler.sendEmptyMessage(AppConstant.WHAT.SUCCESS);
-                                }
-                            }
-                        }).start();
+                    switch (light_num) {
+                        case 0:
+                            //关闭
+                            CameraUtil.getInstance().turnLightOff(mCamera);
+                            break;
+                        case 1:
+                            CameraUtil.getInstance().turnLightOn(mCamera);
+                            break;
+                        case 2:
+                            //自动
+                            CameraUtil.getInstance().turnLightAuto(mCamera);
+                            break;
                     }
+                    captrue();
                     isview = false;
                 }
                 break;
 
-            case R.id.camera_square:
-                if (index == 0) {
-                    camera_square_0();
-                } else if (index == 1) {
-                    camera_square_1();
-                }
-                break;
 
             //前后置摄像头拍照
             case R.id.camera_frontback:
@@ -230,10 +158,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
             //退出相机界面 释放资源
             case R.id.camera_close:
-                if (is_camera_delay) {
-                    Toast.makeText(CameraActivity.this, "正在拍照请稍后...", Toast.LENGTH_SHORT).show();
-                    return;
-                }
                 finish();
                 break;
 
@@ -271,34 +195,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
                 break;
 
-            //延迟拍照时间
-            case R.id.camera_delay_time:
-                switch (delay_time) {
-                    case 0:
-                        delay_time = 3;
-                        delay_time_temp = delay_time;
-                        camera_delay_time.setImageResource(R.drawable.btn_camera_timing_3);
-                        break;
-
-                    case 3:
-                        delay_time = 5;
-                        delay_time_temp = delay_time;
-                        camera_delay_time.setImageResource(R.drawable.btn_camera_timing_5);
-                        break;
-
-                    case 5:
-                        delay_time = 10;
-                        delay_time_temp = delay_time;
-                        camera_delay_time.setImageResource(R.drawable.btn_camera_timing_10);
-                        break;
-
-                    case 10:
-                        delay_time = 0;
-                        delay_time_temp = delay_time;
-                        camera_delay_time.setImageResource(R.drawable.btn_camera_timing_0);
-                        break;
-
-                }
         }
     }
 
@@ -311,61 +207,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         }
     }
 
-    /**
-     * 正方形拍摄
-     */
-    public void camera_square_0() {
-        camera_square.setImageResource(R.drawable.btn_camera_size1_n);
-
-        //属性动画
-        ValueAnimator anim = ValueAnimator.ofInt(0, animHeight);
-        anim.setDuration(300);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int currentValue = Integer.parseInt(animation.getAnimatedValue().toString());
-                RelativeLayout.LayoutParams Params = new RelativeLayout.LayoutParams(screenWidth, currentValue);
-                Params.setMargins(0, SystemUtils.dp2px(context, 44), 0, 0);
-                homeCustom_cover_top_view.setLayoutParams(Params);
-
-                RelativeLayout.LayoutParams bottomParams = new RelativeLayout.LayoutParams(screenWidth, currentValue);
-                bottomParams.setMargins(0, screenHeight - menuPopviewHeight - currentValue, 0, 0);
-                homeCustom_cover_bottom_view.setLayoutParams(bottomParams);
-            }
-
-        });
-        anim.start();
-
-        homeCustom_cover_top_view.bringToFront();
-        home_custom_top_relative.bringToFront();
-        homeCustom_cover_bottom_view.bringToFront();
-        index++;
-    }
-
-    /**
-     * 长方形方形拍摄
-     */
-    public void camera_square_1() {
-        camera_square.setImageResource(R.drawable.btn_camera_size2_n);
-
-        ValueAnimator anim = ValueAnimator.ofInt(animHeight, 0);
-        anim.setDuration(300);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int currentValue = Integer.parseInt(animation.getAnimatedValue().toString());
-                RelativeLayout.LayoutParams Params = new RelativeLayout.LayoutParams(screenWidth, currentValue);
-                Params.setMargins(0, SystemUtils.dp2px(context, 44), 0, 0);
-                homeCustom_cover_top_view.setLayoutParams(Params);
-
-                RelativeLayout.LayoutParams bottomParams = new RelativeLayout.LayoutParams(screenWidth, currentValue);
-                bottomParams.setMargins(0, screenHeight - menuPopviewHeight - currentValue, 0, 0);
-                homeCustom_cover_bottom_view.setLayoutParams(bottomParams);
-            }
-        });
-        anim.start();
-        index = 0;
-    }
 
 
     @Override

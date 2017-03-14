@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@color/White">
+        android:background="@color/Transparent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -101,23 +101,6 @@
             android:layout_weight="1"
             android:padding="10dp"
             android:src="@drawable/selector_btn_flash_light" />
-
-        <ImageView
-            android:id="@+id/camera_square"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="#00000000"
-            android:padding="10dp"
-            android:src="@drawable/btn_camera_size2_n" />
-
-        <ImageView
-            android:id="@+id/camera_delay_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="10dp"
-            android:src="@drawable/btn_camera_timing_0" />
 
         <ImageView
             android:id="@+id/camera_frontback"
