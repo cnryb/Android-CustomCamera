@@ -267,16 +267,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
                 Bitmap saveBitmap = CameraUtil.getInstance().setTakePicktrueOrientation(mCameraId, bitmap);
 
-                saveBitmap = Bitmap.createScaledBitmap(saveBitmap, screenWidth, picHeight, true);
-
-                if (index == 1) {
-                    //正方形 animHeight(动画高度)
-                    saveBitmap = Bitmap.createBitmap(saveBitmap, 0, animHeight + SystemUtils.dp2px(context, 44), screenWidth, screenWidth);
-                } else {
-                    //正方形 animHeight(动画高度)
-                    saveBitmap = Bitmap.createBitmap(saveBitmap, 0, 0, screenWidth, screenWidth * 4 / 3);
-                }
-
                 //String img_path = getExternalFilesDir(Environment.DIRECTORY_DCIM).getPath() +
                 //        File.separator + System.currentTimeMillis() + ".jpeg";
 
