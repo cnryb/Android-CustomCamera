@@ -92,7 +92,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         camera_frontback.setOnClickListener(this);
 
 
-
         //切换正方形时候的动画
         homeCustom_cover_top_view = findViewById(R.id.homeCustom_cover_top_view);
         homeCustom_cover_bottom_view = findViewById(R.id.homeCustom_cover_bottom_view);
@@ -126,7 +125,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         bottomParam.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         homecamera_bottom_relative.setLayoutParams(bottomParam);
     }
-    
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -163,7 +162,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
             //闪光灯
             case R.id.flash_light:
-                if(mCameraId == 1){
+                if (mCameraId == 1) {
                     //前置
                     return;
                 }
@@ -206,7 +205,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             startPreview(mCamera, mHolder);
         }
     }
-
 
 
     @Override
@@ -276,28 +274,30 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                     saveBitmap = Bitmap.createBitmap(saveBitmap, 0, animHeight + SystemUtils.dp2px(context, 44), screenWidth, screenWidth);
                 } else {
                     //正方形 animHeight(动画高度)
-                    saveBitmap = Bitmap.createBitmap(saveBitmap, 0, 0, screenWidth, screenWidth * 4/3);
+                    saveBitmap = Bitmap.createBitmap(saveBitmap, 0, 0, screenWidth, screenWidth * 4 / 3);
                 }
 
-                String img_path = getExternalFilesDir(Environment.DIRECTORY_DCIM).getPath() +
-                        File.separator + System.currentTimeMillis() + ".jpeg";
+                //String img_path = getExternalFilesDir(Environment.DIRECTORY_DCIM).getPath() +
+                //        File.separator + System.currentTimeMillis() + ".jpeg";
+
+                String img_path = Environment.getExternalStorageDirectory() + "/" + System.currentTimeMillis() + ".jpg";
 
                 BitmapUtils.saveJPGE_After(context, saveBitmap, img_path, 100);
 
-                if(!bitmap.isRecycled()){
+                if (!bitmap.isRecycled()) {
                     bitmap.recycle();
                 }
 
-                if(!saveBitmap.isRecycled()){
+                if (!saveBitmap.isRecycled()) {
                     saveBitmap.recycle();
                 }
 
-                Intent intent = new Intent();
-                intent.putExtra(AppConstant.KEY.IMG_PATH, img_path);
-                intent.putExtra(AppConstant.KEY.PIC_WIDTH, screenWidth);
-                intent.putExtra(AppConstant.KEY.PIC_HEIGHT, picHeight);
-                setResult(AppConstant.RESULT_CODE.RESULT_OK, intent);
-                finish();
+
+                releaseCamera();
+                mCamera = getCamera(mCameraId);
+                if (mHolder != null) {
+                    startPreview(mCamera, mHolder);
+                }
 
                 //这里打印宽高 就能看到 CameraUtil.getInstance().getPropPictureSize(parameters.getSupportedPictureSizes(), 200);
                 // 这设置的最小宽度影响返回图片的大小 所以这里一般这是1000左右把我觉得
