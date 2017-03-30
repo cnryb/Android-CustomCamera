@@ -264,12 +264,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                     saveBitmap.recycle();
                 }
 
+                startPreview(mCamera, mHolder);
 
-                releaseCamera();
-                mCamera = getCamera(mCameraId);
-                if (mHolder != null) {
-                    startPreview(mCamera, mHolder);
-                }
 
                 //这里打印宽高 就能看到 CameraUtil.getInstance().getPropPictureSize(parameters.getSupportedPictureSizes(), 200);
                 // 这设置的最小宽度影响返回图片的大小 所以这里一般这是1000左右把我觉得
