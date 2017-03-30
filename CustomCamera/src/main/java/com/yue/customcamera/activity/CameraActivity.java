@@ -57,7 +57,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private int light_num = 0;
 
     private boolean isview = false;
-    private ImageView camera_frontback;
     private ImageView camera_close;
     private RelativeLayout homecamera_bottom_relative;
     private ImageView img_camera;
@@ -87,9 +86,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         home_custom_top_relative = (LinearLayout) findViewById(R.id.home_custom_top_relative);
         home_custom_top_relative.setAlpha(0.5f);
 
-        //前后摄像头切换
-        camera_frontback = (ImageView) findViewById(R.id.camera_frontback);
-        camera_frontback.setOnClickListener(this);
 
 
         //切换正方形时候的动画
@@ -149,12 +145,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                 }
                 break;
 
-
-            //前后置摄像头拍照
-            case R.id.camera_frontback:
-                switchCamera();
-                break;
-
             //退出相机界面 释放资源
             case R.id.camera_close:
                 finish();
@@ -197,14 +187,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         }
     }
 
-    public void switchCamera() {
-        releaseCamera();
-        mCameraId = (mCameraId + 1) % mCamera.getNumberOfCameras();
-        mCamera = getCamera(mCameraId);
-        if (mHolder != null) {
-            startPreview(mCamera, mHolder);
-        }
-    }
 
 
     @Override
