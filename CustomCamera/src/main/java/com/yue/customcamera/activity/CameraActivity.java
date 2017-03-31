@@ -6,11 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -30,6 +33,9 @@ import com.yue.customcamera.utils.SystemUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadFactory;
 
 public class CameraActivity extends Activity implements SurfaceHolder.Callback, View.OnClickListener {
     private Camera mCamera;
@@ -62,6 +68,13 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private ImageView img_camera;
     private int picHeight;
 
+
+
+    boolean mFocusEnd;
+    int mDisplayRotate;
+    int mViewWidth;
+    int mViewHeight;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,8 +86,20 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
     private void initView() {
         surfaceView = (SurfaceView) findViewById(R.id.surfaceView);
+        surfaceView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, final MotionEvent event) {
+
+                //if (event.getAction() == MotionEvent.ACTION_UP) {
+                    focusOnWorkerThread(event, mViewWidth, mViewHeight);
+                //}
+                return true;
+            }
+        });
+
         mHolder = surfaceView.getHolder();
         mHolder.addCallback(this);
+
         img_camera = (ImageView) findViewById(R.id.img_camera);
         img_camera.setOnClickListener(this);
 
@@ -112,6 +137,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
+        mViewWidth=surfaceView.getWidth();
+        mViewHeight=surfaceView.getHeight();
 
         menuPopviewHeight = screenHeight - screenWidth * 4 / 3;
         animHeight = (screenHeight - screenWidth - menuPopviewHeight - SystemUtils.dp2px(context, 44)) / 2;
@@ -263,7 +290,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                 if (!saveBitmap.isRecycled()) {
                     saveBitmap.recycle();
                 }
-
+                
                 startPreview(mCamera, mHolder);
 
 
@@ -281,10 +308,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private void setupCamera(Camera camera) {
         Camera.Parameters parameters = camera.getParameters();
 
-        if (parameters.getSupportedFocusModes().contains(
-                Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        }
+//        if (parameters.getSupportedFocusModes().contains(
+//                Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+//            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+//        }
 
         //这里第三个参数为最小尺寸 getPropPreviewSize方法会对从最小尺寸开始升序排列 取出所有支持尺寸的最小尺寸
         Camera.Size previewSize = CameraUtil.getInstance().getPropSizeForHeight(parameters.getSupportedPreviewSizes(), 800);
@@ -339,4 +366,104 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         releaseCamera();
     }
 
+
+
+    /**
+     * 触摸对焦
+     * **/
+
+
+    void focusOnWorkerThread(final MotionEvent event, final int viewWidth, final int viewHeight) {
+        if (null == mCamera) {
+            //Log.e(TAG, "camera not initialized");
+            return;
+        }
+
+//        if (false == mFocusEnd) {
+//            //Log.d(TAG, "autofocusing...");
+//            return;
+//        }
+//        mFocusEnd=false;
+
+        //// TODO: 2017/3/30 api level below 14, can't use foucs area
+
+
+        Rect focusRect = calculateTapArea(event.getRawX(), event.getRawY(), mDisplayRotate, viewWidth, viewHeight, 1f);
+        Rect meteringRect = calculateTapArea(event.getRawX(), event.getRawY(), mDisplayRotate, viewWidth, viewHeight, 1.5f);
+
+        Camera.Parameters parameters = mCamera.getParameters();
+        List<String> modes = parameters.getSupportedFocusModes();
+        if (!modes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            //Log.e(TAG, "camera don't support auto focus");
+            return;
+        }
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+
+        if (parameters.getMaxNumFocusAreas() > 0) {
+            List<Camera.Area> focusAreas = new ArrayList<Camera.Area>();
+            focusAreas.add(new Camera.Area(focusRect, 1000));
+            parameters.setFocusAreas(focusAreas);
+        }
+
+        if (parameters.getMaxNumMeteringAreas() > 0) {
+            List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+            meteringAreas.add(new Camera.Area(meteringRect, 1000));
+
+            parameters.setMeteringAreas(meteringAreas);
+        }
+
+
+        //对焦时是否许需要打开闪光灯
+            //parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+
+
+        try {
+            mCamera.setParameters(parameters);
+            mCamera.autoFocus(mAutoFocusCallback);
+            //Log.i(TAG, "start autoFocus");
+        } catch (Exception e) {
+            //Log.e(TAG, "autofocus failed, " + e.getMessage());
+            mFocusEnd = true;
+        }
+    }
+    Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+            mFocusEnd = true;
+        }
+    };
+
+    /**
+     * Convert touch position x:y to {@link Camera.Area} position -1000:-1000 to 1000:1000.
+     */
+    @SuppressWarnings("SuspiciousNameCombination")
+    Rect calculateTapArea(float x, float y, int rotation, int viewWidth, int viewHeight, float coefficient) {
+        float focusAreaSize = 300;
+        int areaSize = Float.valueOf(focusAreaSize * coefficient).intValue();
+
+        int tempX = (int) (x / viewWidth * 2000 - 1000);
+        int tempY = (int) (y / viewHeight * 2000 - 1000);
+
+        int centerX = 0, centerY = 0;
+        if (90 == rotation) {
+            centerX = tempY;
+            centerY = (2000 - (tempX + 1000) - 1000);
+        } else if (270 == rotation) {
+            centerX = (2000 - (tempY + 1000)) - 1000;
+            centerY = tempX;
+        }
+
+        int left = clamp(centerX - areaSize / 2, -1000, 1000);
+        int right = clamp(left + areaSize, -1000, 1000);
+        int top = clamp(centerY - areaSize / 2, -1000, 1000);
+        int bottom = clamp(top + areaSize, -1000, 1000);
+
+        return new Rect(left, top, right, bottom);
+    }
+
+    int clamp(int x, int min, int max) {
+        if (x > max) return max;
+        if (x < min) return min;
+        return x;
+    }
 }
