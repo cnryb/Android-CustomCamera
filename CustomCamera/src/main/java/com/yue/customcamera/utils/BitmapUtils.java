@@ -806,29 +806,6 @@ public class BitmapUtils {
         MediaScannerConnection.scanFile(context, new String[]{path}, null, null);
     }
 
-    public static Bitmap returnSaturationBitmap(Context context, Bitmap bitmap, int screenWidth, int screenHeight) {
-        Bitmap bmp = null;
-/*
-        int maxWidth = MyApplication.getInstance().getScreenWidth() - SystemUtils.dp2px(context, 20);
-        int maxHeight = maxWidth * 4 / 3;*/
-
-        int reqWidth = screenWidth - SystemUtils.dp2px(context, 20);
-        int reqHeight = reqWidth * 4 / 3;
-
-        bmp = createBitmap(bitmap, reqWidth, reqHeight);
-
-        ColorMatrix cMatrix = new ColorMatrix();
-        // 设置饱和度
-        cMatrix.setSaturation(0.0f);
-
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(cMatrix));
-
-        Canvas canvas = new Canvas(bmp);
-        // 在Canvas上绘制一个已经存在的Bitmap。这样，dstBitmap就和srcBitmap一摸一样了
-        canvas.drawBitmap(bitmap, 0, 0, paint);
-        return bmp;
-    }
 
     /**
      * 创建期望大小的bitmap

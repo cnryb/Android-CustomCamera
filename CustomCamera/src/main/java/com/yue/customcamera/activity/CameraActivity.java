@@ -22,7 +22,6 @@ import android.widget.RelativeLayout;
 import com.yue.customcamera.R;
 import com.yue.customcamera.utils.BitmapUtils;
 import com.yue.customcamera.utils.CameraUtil;
-import com.yue.customcamera.utils.SystemUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -132,7 +131,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         mViewHeight=surfaceView.getHeight();
 
         menuPopviewHeight = screenHeight - screenWidth * 4 / 3;
-        animHeight = (screenHeight - screenWidth - menuPopviewHeight - SystemUtils.dp2px(context, 44)) / 2;
+        animHeight = (screenHeight - screenWidth - menuPopviewHeight - dp2px(context, 44)) / 2;
 
         //这里相机取景框我这是为宽高比3:4 所以限制底部控件的高度是剩余部分
         RelativeLayout.LayoutParams bottomParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, menuPopviewHeight);
@@ -456,5 +455,15 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         if (x > max) return max;
         if (x < min) return min;
         return x;
+    }
+
+
+
+    /**
+     * 将dip或dp值转换为px值，保证尺寸大小不变
+     */
+    public static int dp2px(Context context, float dipValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dipValue * scale + 0.5f);
     }
 }
