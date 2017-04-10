@@ -44,11 +44,8 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private View home_camera_cover_bottom_view;
     private ImageView flash_light;
 
-    private int index;
     //底部高度 主要是计算切换正方形时的动画高度
     private int menuPopviewHeight;
-    //动画高度
-    private int animHeight;
     //闪光灯模式 0:关闭 1: 开启 2: 自动
     private int light_num = 0;
 
@@ -56,8 +53,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     private ImageView camera_close;
     private RelativeLayout homecamera_bottom_relative;
     private ImageView img_camera;
-    private int picHeight;
-
 
 
     boolean mFocusEnd;
@@ -81,7 +76,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             public boolean onTouch(View v, final MotionEvent event) {
 
                 //if (event.getAction() == MotionEvent.ACTION_UP) {
-                    focusOnWorkerThread(event, mViewWidth, mViewHeight);
+                focusOnWorkerThread(event, mViewWidth, mViewHeight);
                 //}
                 return true;
             }
@@ -100,7 +95,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         //top 的view
         home_custom_top_relative = (LinearLayout) findViewById(R.id.home_custom_top_relative);
         home_custom_top_relative.setAlpha(0.5f);
-
 
 
         //切换正方形时候的动画
@@ -127,11 +121,10 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
-        mViewWidth=surfaceView.getWidth();
-        mViewHeight=surfaceView.getHeight();
+        mViewWidth = surfaceView.getWidth();
+        mViewHeight = surfaceView.getHeight();
 
         menuPopviewHeight = screenHeight - screenWidth * 4 / 3;
-        animHeight = (screenHeight - screenWidth - menuPopviewHeight - dp2px(context, 44)) / 2;
 
         //这里相机取景框我这是为宽高比3:4 所以限制底部控件的高度是剩余部分
         RelativeLayout.LayoutParams bottomParam = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, menuPopviewHeight);
@@ -203,7 +196,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
         }
     }
-
 
 
     @Override
@@ -280,7 +272,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
                 if (!saveBitmap.isRecycled()) {
                     saveBitmap.recycle();
                 }
-                
+
                 startPreview(mCamera, mHolder);
 
 
@@ -311,16 +303,6 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         parameters.setPictureSize(pictrueSize.width, pictrueSize.height);
 
         camera.setParameters(parameters);
-
-        /**
-         * 设置surfaceView的尺寸 因为camera默认是横屏，所以取得支持尺寸也都是横屏的尺寸
-         * 我们在startPreview方法里面把它矫正了过来，但是这里我们设置设置surfaceView的尺寸的时候要注意 previewSize.height<previewSize.width
-         * previewSize.width才是surfaceView的高度
-         * 一般相机都是屏幕的宽度 这里设置为屏幕宽度 高度自适应 你也可以设置自己想要的大小
-         *
-         */
-
-        picHeight = (screenWidth * pictrueSize.width) / pictrueSize.height;
 
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(screenWidth, (screenWidth * pictrueSize.width) / pictrueSize.height);
         //这里当然可以设置拍照位置 比如居中 我这里就置顶了
@@ -357,10 +339,9 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
     }
 
 
-
     /**
      * 触摸对焦
-     * **/
+     **/
 
 
     void focusOnWorkerThread(final MotionEvent event, final int viewWidth, final int viewHeight) {
@@ -404,7 +385,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
 
 
         //对焦时是否许需要打开闪光灯
-            //parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        //parameters.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
 
 
         try {
@@ -416,6 +397,7 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
             mFocusEnd = true;
         }
     }
+
     Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
         @Override
         public void onAutoFocus(boolean success, Camera camera) {
@@ -457,13 +439,4 @@ public class CameraActivity extends Activity implements SurfaceHolder.Callback, 
         return x;
     }
 
-
-
-    /**
-     * 将dip或dp值转换为px值，保证尺寸大小不变
-     */
-    public static int dp2px(Context context, float dipValue) {
-        final float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (dipValue * scale + 0.5f);
-    }
 }
