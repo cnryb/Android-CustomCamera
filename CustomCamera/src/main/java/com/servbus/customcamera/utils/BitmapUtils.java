@@ -1,4 +1,4 @@
-package com.yue.customcamera.utils;
+package com.servbus.customcamera.utils;
 
 import android.content.Context;
 import android.content.res.Resources;

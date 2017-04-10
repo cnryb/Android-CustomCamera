@@ -1,4 +1,4 @@
-package com.yue.customcamera.utils;
+package com.servbus.customcamera.utils;
 
 /**
  * Created by yue on 2015/8/13.

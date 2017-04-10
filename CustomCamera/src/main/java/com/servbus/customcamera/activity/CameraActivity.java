@@ -1,4 +1,4 @@
-package com.yue.customcamera.activity;
+package com.servbus.customcamera.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,9 +19,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
-import com.yue.customcamera.R;
-import com.yue.customcamera.utils.BitmapUtils;
-import com.yue.customcamera.utils.CameraUtil;
+import com.servbus.customcamera.R;
+import com.servbus.customcamera.utils.BitmapUtils;
+import com.servbus.customcamera.utils.CameraUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
