@@ -65,9 +65,6 @@ public class MyApplication extends Application {
         super.onCreate();
         instance = this;
         context = this.getApplicationContext();
-//        CrashReport.initCrashReport(this, "900011702", AppConfig.DEBUG);//bugly
-        initDir();//初始化默认路径
-        initMemorySize();//打印APP最大可以申请的内存
     }
 
 
@@ -76,128 +73,8 @@ public class MyApplication extends Application {
     }
 
     private void initDir() {
-        //初始化应用存储路径
-        APP_PATH = BASE_PATH + File.separator + AppConfig.APP_PATH_NAME;
-        CACHE_PATH = MyApplication.getInstance().getExternalFilesDir(null) + File.separator + AppConfig.CACHE_PATH_NAME;
-        CACHE_PATH_FRAMES = MyApplication.getInstance().getExternalFilesDir(null) + File.separator + AppConfig.CACHE_PATH_FRAMES_NAME;
-        PICTURE_PATH = APP_PATH + File.separator + AppConfig.PICTURE_PATH_NAME;
-        TEMP_PATH = APP_PATH + File.separator + AppConfig.TEMP_PATH_NAME;
-
-        VIDEO_TEMP_PATH = MyApplication.getInstance().getFilesDir() + File.separator + AppConfig.VIDEO_TEMP_PATH_NAME;
-        VIDEO_PATH = APP_PATH + File.separator + AppConfig.VIDEO_PATH_NAME;
-        VIDEO_FRAMES_PATH = MyApplication.getInstance().getFilesDir() + File.separator + AppConfig.VIDEO_FRAMES_NAME;
-
-        /*TEMP_PATH = APP_PATH + File.separator + AppConfig.TEMP_PATH_NAME;
-        VIDEO_PATH = APP_PATH + File.separator + AppConfig.VIDEO_PATH_NAME;
-        VIDEO_FRAMES_PATH = APP_PATH + File.separator + AppConfig.VIDEO_FRAMES_NAME;*/
-
-        GIF_PATH = APP_PATH + File.separator + AppConfig.GIF_PATH_NAME;
-        APK_PATH = APP_PATH + File.separator + AppConfig.APK_PATH_NAME;
-        FILTER_PATH = MyApplication.getInstance().getFilesDir() + File.separator + AppConfig.FILTER_PATH_NAME;
-        SCENE_PATH = MyApplication.getInstance().getFilesDir() + File.separator + AppConfig.SCENE_PATH_NAME;
-        FONT_PATH = APP_PATH + File.separator + AppConfig.FONT_PATH_NAME;
-        FONT_CACHE_PATH = APP_PATH + File.separator + AppConfig.FONT_CACHE_NAME;
-        //判断是否存在,如不存在则创建目录
-        File dir = null;
-        /*if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(CACHE_PATH_FRAMES);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(TEMP_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(VIDEO_TEMP_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(PICTURE_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(GIF_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(APK_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(FILTER_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-        dir = new File(SCENE_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }*/
-        dir = new File(VIDEO_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        /*dir = new File(VIDEO_FRAMES_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        dir = new File(FONT_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        dir = new File(FONT_CACHE_PATH);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }*/
     }
 
-   /* //初始化Fresco
-    private void initFresco() {
-        DiskCacheConfig diskCacheConfig = DiskCacheConfig.newBuilder(this)
-                .setBaseDirectoryPath(new File(getCachePath()))
-                .setBaseDirectoryName(AppConfig.FresocCache)
-                .setMaxCacheSize(AppConfig.FresocCacheSzie)
-                .build();
-        ImagePipelineConfig config = OkHttpImagePipelineConfigFactory
-                .newBuilder(this, JsonHttpHelper.getInstance().getOkHttpClient())
-                .setMainDiskCacheConfig(diskCacheConfig)
-                .setProgressiveJpegConfig(new SimpleProgressiveJpegConfig())
-                .setBitmapsConfig(AppConfig.BitmapConfig)
-                .build();
-        Fresco.initialize(this, config);
-    }*/
-
-   /* private void initImageLoader() {
-        File file = new File(CACHE_PATH + File.separator + AppConfig.ImageLoaderCache);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.img_picloading) // 设置图片下载期间显示的图片
-                .cacheInMemory(true) // 设置下载的图片是否缓存在内存中
-                .cacheOnDisk(true)
-                .imageScaleType(ImageScaleType.NONE)
-                .build(); // 创建配置过得DisplayImageOption对象
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
-                getApplicationContext())
-                .defaultDisplayImageOptions(defaultOptions)
-                .denyCacheImageMultipleSizesInMemory()
-                .tasksProcessingOrder(QueueProcessingType.FIFO)
-                .diskCache(new UnlimitedDiskCache(file))
-                .diskCacheSize(AppConfig.ImageLoaderCacheSzie)
-                .diskCacheFileNameGenerator(new Md5FileNameGenerator())
-                .build();
-        ImageLoader.getInstance().init(config);
-    }
-*/
-    //用于打印APP最多可申请的内存
-    private void initMemorySize() {
-        maxMemory = Runtime.getRuntime().maxMemory();
-    }
 
     //根据后缀自动生成临时文件
     public String getTempFileNameForExtension(String extension) {
